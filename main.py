@@ -76,7 +76,6 @@ def format_docs(docs):
 history = []
 prompt_str="""
 Answer the user question based only on the following context:
-{context}
 
 conversation_history: {chat_history}
 
@@ -88,9 +87,9 @@ retriever = qdrant.as_retriever(search_type="similarity",
                                         search_kwargs={"k": num_chunks})
 chat_llm = ChatOpenAI(model_name=llm_name, openai_api_key=openai.api_key, temperature=0)
 query_fetcher= itemgetter("question")
-setup={"question":query_fetcher,"context":query_fetcher | retriever | format_docs}
+history_fetcher=itemgetter("chat_history")
+setup={"question":query_fetcher,"chat_history":history_fetcher | retriever | format_docs}
 _chain = setup |_prompt | chat_llm | StrOutputParser()
-
 query="Write your query"
 response=_chain.invoke({"question":query, "chat_history":"\n".join(str(history))})
 print(response)
