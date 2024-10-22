@@ -1,6 +1,4 @@
-# Install required libraries
-!pip install qdrant_client langchain_huggingface langchain-community langchain-qdrant pypdf openai langchain transformers langchain_huggingface
-
+Install required libraries
 from langchain_community.document_loaders import BSHTMLLoader
 from langchain_text_splitters import HTMLHeaderTextSplitter
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -42,9 +40,9 @@ for doc in splits:
     for i, text_chunk in enumerate(pg_split):
         metadata = {
             "source": original_metadata.get("source", ""),
-            "author": "Xeven Solutions",
-            "description": "Xeven Solutions - AI Development & Solutions Company",
-            "keywords": "AI, Development, Machine Learning, Deep Learning, Services",
+            "author": ".........", #Give metadata value according to your document and data
+            "description": "................",
+            "keywords": "..................",
             "chunk_no": chunk_count
         }
         
@@ -69,43 +67,33 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 llm_name = "gpt-4o-mini"
 llm = ChatOpenAI(model_name=llm_name, openai_api_key=openai.api_key, temperature=0)
 
-# Define prompt template
-prompt_str = """Answer the user question briefly.\n\nQuestion: {question}"""
-prompt = ChatPromptTemplate.from_template(prompt_str)
-question_fetcher = itemgetter("question")
-
-# Create chain to fetch response from LLM
-chain = question_fetcher | prompt | llm | StrOutputParser()
-
-# Example query
-query = "Who is Elon Musk?"
-response = chain.invoke({"question": query})
-print(response)
-
-# Retriever for handling similarity-based search in Qdrant
-num_chunks = 3
-retriever = qdrant.as_retriever(search_type="similarity", search_kwargs={"k": num_chunks})
-
 # Define chat chain for conversational context
+def format_docs(docs):
+    # This function formats the retrieved documents for the language model's prompt.
+    # It takes a list of documents and returns a single string containing their content,
+    # separated by double newlines.
+    return "\n\n".join(doc.page_content for doc in docs)
 history = []
-_prompt = ChatPromptTemplate.from_template("""
+prompt_str="""
 Answer the user question based only on the following context:
 {context}
 
 conversation_history: {chat_history}
 
 Question: {question}
-""")
-setup = {"question": question_fetcher, "context": retriever | format_docs}
-_chain = setup | _prompt | llm | StrOutputParser()
+"""
+_prompt = ChatPromptTemplate.from_template(prompt_str)
+num_chunks=3
+retriever = qdrant.as_retriever(search_type="similarity",
+                                        search_kwargs={"k": num_chunks})
+chat_llm = ChatOpenAI(model_name=llm_name, openai_api_key=openai.api_key, temperature=0)
+query_fetcher= itemgetter("question")
+setup={"question":query_fetcher,"context":query_fetcher | retriever | format_docs}
+_chain = setup |_prompt | chat_llm | StrOutputParser()
 
-# Query example
-query = "Who is Irfan Malik?"
-response = _chain.invoke({"question": query, "chat_history": "\n".join(str(history))})
+query="Write your query"
+response=_chain.invoke({"question":query, "chat_history":"\n".join(str(history))})
 print(response)
-
-# Append the conversation to history
-history.append(("user_question:" + query, "ai_response:" + response))
-
-# Display the response content
-response.page_content
+query="user_question:"+query
+response="ai_response:"+response
+history.append((query, response))
