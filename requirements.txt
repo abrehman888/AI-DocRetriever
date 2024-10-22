@@ -1,0 +1,3 @@
+Install dependencies  
+install the required Python packages using pip:  
+pip install qdrant_client langchain_huggingface langchain-community langchain-qdrant pypdf openai langchain transformers langchain_text_splitters
