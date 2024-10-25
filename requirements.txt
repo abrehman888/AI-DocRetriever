@@ -5,3 +5,4 @@ langchain-qdrant
 openai
 langchain
 transformers
+python-dotenv
