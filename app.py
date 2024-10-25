@@ -28,40 +28,73 @@ qdrant = QdrantVectorStore(client=client, embedding=embed_model, collection_name
 st.title("Chat with Qdrant and OpenAI")
 st.write("Ask your question below:")
 
-# Initialize chat history
+# Initialize session state for history if it doesn't exist
 if 'chat_history' not in st.session_state:
-    st.session_state.chat_history = []
+    st.session_state['chat_history'] = []
 
-# User input
-query = st.text_input("Your Question:")
+def format_docs(docs):
+    return "\n\n".join(doc.page_content for doc in docs)
 
-if st.button("Submit"):
-    if query:
-        # Store the user query in chat history
-        st.session_state.chat_history.append({"role": "user", "content": query})
+# Set up the prompt template
+prompt_str = """
+Answer the user question based only on the following context:
 
-       # Create a ChatOpenAI instance
-chat_llm = ChatOpenAI(model_name='gpt-3.5-turbo', openai_api_key=openai.api_key)
+conversation_history: {chat_history}
 
-# Convert chat history to LangChain message objects
-formatted_messages = []
-for msg in st.session_state.chat_history:
-    if msg['role'] == 'user':
-        formatted_messages.append(HumanMessage(content=msg['content']))
-    elif msg['role'] == 'assistant':
-        formatted_messages.append(AIMessage(content=msg['content']))
+Question: {question}
+"""
+_prompt = ChatPromptTemplate.from_template(prompt_str)
 
-# Get the response from the model
-response = chat_llm(formatted_messages)
+# Number of chunks for retrieval
+num_chunks = 3
 
-# Store the AI response in chat history
-st.session_state.chat_history.append({"role": "assistant", "content": response['choices'][0]['message']['content']})
+# Qdrant retriever setup (adjust 'qdrant' to your Qdrant client configuration)
+retriever = qdrant.as_retriever(search_type="similarity", search_kwargs={"k": num_chunks})
 
-# Display the response
-st.write("Response:")
-st.write(response['choices'][0]['message']['content'])
+# LLM setup
+llm_name = "gpt-3.5-turbo"
+chat_llm = ChatOpenAI(model_name=llm_name, openai_api_key=openai.api_key, temperature=0)
 
-# Display chat history
-st.write("Chat History:")
-for msg in st.session_state.chat_history:
-    st.write(f"{msg['role']}: {msg['content']}")
+# Extractors for question and chat history
+query_fetcher = itemgetter("question")
+history_fetcher = itemgetter("chat_history")
+
+# Streamlit app layout
+st.title("Conversational Chain with RAG")
+
+# Input form for user query
+with st.form("query_form"):
+    user_query = st.text_input("Ask a question:")
+    submitted = st.form_submit_button("Submit")
+
+if submitted and user_query:
+    # Set up the chain for retrieval and response
+    setup = {"question": query_fetcher, "chat_history": history_fetcher | retriever | format_docs}
+    _chain = setup | _prompt | chat_llm | StrOutputParser()
+
+    # Prepare the chat history
+    formatted_history = "\n".join([str(h) for h in st.session_state['chat_history']])
+
+    # Invoke the chain
+    response = _chain.invoke({"question": user_query, "chat_history": formatted_history})
+
+    # Append to history and display
+    query = f"user_question: {user_query}"
+    response_str = f"ai_response: {response}"
+
+    # Store the conversation in session state
+    st.session_state['chat_history'].append((query, response_str))
+
+    # Display the response
+    st.write("AI Response:")
+    st.write(response_str)
+
+    # Display the conversation history
+    st.write("Conversation History:")
+    for msg in st.session_state['chat_history']:
+        st.write(f"{msg[0]}\n{msg[1]}")
+
+# Option to clear the chat history
+if st.button("Clear History"):
+    st.session_state['chat_history'] = []
+    st.success("Chat history cleared!")
