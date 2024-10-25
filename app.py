@@ -39,22 +39,18 @@ if st.button("Submit"):
         # Store the user query in chat history
         st.session_state.chat_history.append({"role": "user", "content": query})
 
-        # Prepare the prompt with chat history
-        chat_history_str = "\n".join([f"{msg['role']}: {msg['content']}" for msg in st.session_state.chat_history])
-        prompt_str = f"Answer the user question based only on the following context:\n\nconversation_history: {chat_history_str}\n\nQuestion: {query}"
-
         # Create a ChatOpenAI instance
         chat_llm = ChatOpenAI(model_name='gpt-3.5-turbo', openai_api_key=openai.api_key)
 
-        # Get the response from the model
-        response = chat_llm(prompt_str)
+        # Get the response from the model using the chat history
+        response = chat_llm(st.session_state.chat_history)
 
         # Store the AI response in chat history
-        st.session_state.chat_history.append({"role": "assistant", "content": response})
+        st.session_state.chat_history.append({"role": "assistant", "content": response['choices'][0]['message']['content']})
 
         # Display the response
         st.write("Response:")
-        st.write(response)
+        st.write(response['choices'][0]['message']['content'])
 
         # Display chat history
         st.write("Chat History:")
