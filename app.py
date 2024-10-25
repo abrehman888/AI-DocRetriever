@@ -21,7 +21,7 @@ embed_model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5')
 client = QdrantClient(url=qdrant_url, api_key=qdrant_key)
 
 # Initialize QdrantVectorStore
-qdrant = QdrantVectorStore(client=client, embedding=embed_model, collection_name='your_collection_name')
+qdrant = QdrantVectorStore(client=client, embedding=embed_model, collection_name='demo')
 
 # Streamlit UI
 st.title("Chat with Qdrant and OpenAI")
