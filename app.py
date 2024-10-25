@@ -8,6 +8,7 @@ from langchain.chains import create_retrieval_chain
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+from langchain.schema import AIMessage, HumanMessage
 
 # Load environment variables
 qdrant_url = st.secrets["QDRANT_URL"]
@@ -39,25 +40,28 @@ if st.button("Submit"):
         # Store the user query in chat history
         st.session_state.chat_history.append({"role": "user", "content": query})
 
-        # Create a ChatOpenAI instance
-        chat_llm = ChatOpenAI(model_name='gpt-3.5-turbo', openai_api_key=openai.api_key)
+       # Create a ChatOpenAI instance
+chat_llm = ChatOpenAI(model_name='gpt-3.5-turbo', openai_api_key=openai.api_key)
 
-        # Convert chat history to list of messages in the correct format
-        messages = [{"role": msg["role"], "content": msg["content"]} for msg in st.session_state.chat_history]
+# Convert chat history to LangChain message objects
+formatted_messages = []
+for msg in st.session_state.chat_history:
+    if msg['role'] == 'user':
+        formatted_messages.append(HumanMessage(content=msg['content']))
+    elif msg['role'] == 'assistant':
+        formatted_messages.append(AIMessage(content=msg['content']))
 
-        # Get the response from the model using the properly formatted messages
-        response = chat_llm(messages)
+# Get the response from the model
+response = chat_llm(formatted_messages)
 
-        # Store the AI response in chat history
-        st.session_state.chat_history.append({"role": "assistant", "content": response['choices'][0]['message']['content']})
+# Store the AI response in chat history
+st.session_state.chat_history.append({"role": "assistant", "content": response['choices'][0]['message']['content']})
 
-        # Display the response
-        st.write("Response:")
-        st.write(response['choices'][0]['message']['content'])
+# Display the response
+st.write("Response:")
+st.write(response['choices'][0]['message']['content'])
 
-        # Display chat history
-        st.write("Chat History:")
-        for msg in st.session_state.chat_history:
-            st.write(f"{msg['role']}: {msg['content']}")
-    else:
-        st.error("Please enter a question.")
+# Display chat history
+st.write("Chat History:")
+for msg in st.session_state.chat_history:
+    st.write(f"{msg['role']}: {msg['content']}")
