@@ -10,10 +10,10 @@ from langchain.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
 # Load environment variables
-qdrant_url = os.getenv("QDRANT_URL")
-qdrant_key = os.getenv("QDRANT_API_KEY")
-openai.api_key = os.getenv("OPENAI_API_KEY")
-collection_name=os.getenv("Collection_ Name")
+qdrant_url = st.secrets("QDRANT_URL")
+qdrant_key = st.secrets("QDRANT_API_KEY")
+openai.api_key = st.secrets("OPENAI_API_KEY")
+collection_name=os.st.secrets("Collection_Name")
 # Initialize embedding model
 embed_model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5')
 
