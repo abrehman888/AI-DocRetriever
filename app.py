@@ -34,21 +34,6 @@ if 'chat_history' not in st.session_state:
 # User input
 query = st.text_input("Your Question:")
 
-import streamlit as st
-from langchain.chat_models import ChatOpenAI
-import openai
-
-# Streamlit UI
-st.title("Chat with Qdrant and OpenAI")
-st.write("Ask your question below:")
-
-# Initialize chat history
-if 'chat_history' not in st.session_state:
-    st.session_state.chat_history = []
-
-# User input
-query = st.text_input("Your Question:")
-
 if st.button("Submit"):
     if query:
         # Store the user query in chat history
