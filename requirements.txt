@@ -1,1 +1,7 @@
 qdrant_client
+langchain_huggingface
+langchain-community
+langchain-qdrant
+openai
+langchain
+transformers
