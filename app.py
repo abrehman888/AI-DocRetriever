@@ -65,22 +65,33 @@ with st.form("query_form"):
     submitted = st.form_submit_button("Submit")
 
 if submitted and user_query:
-    # Prepare the chat history
-    formatted_history = "\n".join([str(h[1]) for h in st.session_state['chat_history']])  # Get just the responses
+    # Prepare the chat history in the proper format
+    messages = []
+    for msg in st.session_state['chat_history']:
+        if "user_question" in msg[0]:
+            messages.append(HumanMessage(content=msg[0].replace("user_question: ", "")))
+        if "ai_response" in msg[1]:
+            messages.append(AIMessage(content=msg[1].replace("ai_response: ", "")))
+
+    # Add the new user question as a HumanMessage
+    messages.append(HumanMessage(content=user_query))
 
     # Use the retriever to get relevant chunks (documents)
     docs = retriever.get_relevant_documents(user_query)
     context = format_docs(docs)
 
     # Set up the variables for the prompt
-    formatted_input = {"question": user_query, "chat_history": formatted_history}
+    formatted_input = {"question": user_query, "chat_history": context}
 
     # Invoke the chain (LLM call)
-    response = chat_llm(_prompt.format(**formatted_input))
+    response = chat_llm.generate(messages)  # Pass the list of messages (including history)
+
+    # Extract the AI's response from the output
+    response_str = response.generations[0].message['content']
 
     # Append to history and display
     query = f"user_question: {user_query}"
-    response_str = f"ai_response: {response}"
+    response_str = f"ai_response: {response_str}"
 
     # Store the conversation in session state
     st.session_state['chat_history'].append((query, response_str))
