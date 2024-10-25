@@ -34,6 +34,21 @@ if 'chat_history' not in st.session_state:
 # User input
 query = st.text_input("Your Question:")
 
+import streamlit as st
+from langchain.chat_models import ChatOpenAI
+import openai
+
+# Streamlit UI
+st.title("Chat with Qdrant and OpenAI")
+st.write("Ask your question below:")
+
+# Initialize chat history
+if 'chat_history' not in st.session_state:
+    st.session_state.chat_history = []
+
+# User input
+query = st.text_input("Your Question:")
+
 if st.button("Submit"):
     if query:
         # Store the user query in chat history
@@ -42,8 +57,11 @@ if st.button("Submit"):
         # Create a ChatOpenAI instance
         chat_llm = ChatOpenAI(model_name='gpt-3.5-turbo', openai_api_key=openai.api_key)
 
-        # Get the response from the model using the chat history
-        response = chat_llm(st.session_state.chat_history)
+        # Convert chat history to list of messages in the correct format
+        messages = [{"role": msg["role"], "content": msg["content"]} for msg in st.session_state.chat_history]
+
+        # Get the response from the model using the properly formatted messages
+        response = chat_llm(messages)
 
         # Store the AI response in chat history
         st.session_state.chat_history.append({"role": "assistant", "content": response['choices'][0]['message']['content']})
