@@ -28,6 +28,7 @@ qdrant = QdrantVectorStore(client=client, embedding=embed_model, collection_name
 st.title("Chat with Qdrant and OpenAI")
 st.write("Ask your question below:")
 
+
 # Initialize session state for history if it doesn't exist
 if 'chat_history' not in st.session_state:
     st.session_state['chat_history'] = []
@@ -55,10 +56,6 @@ retriever = qdrant.as_retriever(search_type="similarity", search_kwargs={"k": nu
 llm_name = "gpt-3.5-turbo"
 chat_llm = ChatOpenAI(model_name=llm_name, openai_api_key=openai.api_key, temperature=0)
 
-# Extractors for question and chat history
-#query_fetcher = itemgetter("question")
-#history_fetcher = itemgetter("chat_history")
-
 # Streamlit app layout
 st.title("Conversational Chain with RAG")
 
@@ -68,15 +65,18 @@ with st.form("query_form"):
     submitted = st.form_submit_button("Submit")
 
 if submitted and user_query:
-    # Set up the chain for retrieval and response
-    setup = {"question": query_fetcher, "chat_history": history_fetcher | retriever | format_docs}
-    _chain = setup | _prompt | chat_llm | StrOutputParser()
-
     # Prepare the chat history
-    formatted_history = "\n".join([str(h) for h in st.session_state['chat_history']])
+    formatted_history = "\n".join([str(h[1]) for h in st.session_state['chat_history']])  # Get just the responses
 
-    # Invoke the chain
-    response = _chain.invoke({"question": user_query, "chat_history": formatted_history})
+    # Use the retriever to get relevant chunks (documents)
+    docs = retriever.get_relevant_documents(user_query)
+    context = format_docs(docs)
+
+    # Set up the variables for the prompt
+    formatted_input = {"question": user_query, "chat_history": formatted_history}
+
+    # Invoke the chain (LLM call)
+    response = chat_llm(_prompt.format(**formatted_input))
 
     # Append to history and display
     query = f"user_question: {user_query}"
