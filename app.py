@@ -56,8 +56,8 @@ llm_name = "gpt-3.5-turbo"
 chat_llm = ChatOpenAI(model_name=llm_name, openai_api_key=openai.api_key, temperature=0)
 
 # Extractors for question and chat history
-query_fetcher = itemgetter("question")
-history_fetcher = itemgetter("chat_history")
+#query_fetcher = itemgetter("question")
+#history_fetcher = itemgetter("chat_history")
 
 # Streamlit app layout
 st.title("Conversational Chain with RAG")
