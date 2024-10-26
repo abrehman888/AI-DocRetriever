@@ -10,7 +10,7 @@ from langchain_core.output_parsers import StrOutputParser
 from operator import itemgetter
 
 # Set page configuration for title and icon
-st.set_page_config(page_title="Chat with Xeven Solution", page_icon=":speech_balloon:")
+st.set_page_config(page_title="Chat with Xeven Solution 💬", page_icon=":speech_balloon:")
 
 # Load environment variables
 qdrant_url = st.secrets["QDRANT_URL"]
@@ -121,7 +121,7 @@ _chain = setup | _prompt | chat_llm | StrOutputParser()
 # Create a form for user input
 with st.form(key="query_form"):
     query = st.text_input("Ask a question about Xeven:", key="user_query")
-    submit_button = st.form_submit_button(label="Get Response")  # Added submit button
+    submit_button = st.form_submit_button(label=" 💡 Get Response")  # Added submit button
 
 # Process the query if the form is submitted
 if submit_button and query:
