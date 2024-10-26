@@ -107,7 +107,7 @@ st.write("**Developed by <span class='highlighted-name'>Abdul Rehman</span>**")
 st.write("Ask your question below:")
 
 def format_docs(docs):
-    return "\n\n".join(doc.page_content for doc in docs)
+  return "\n\n".join(doc.page_content for doc in docs)
 
 # Set up the prompt template
 prompt_str = """
