@@ -26,7 +26,9 @@ client = QdrantClient(url=qdrant_url, api_key=qdrant_key)
 qdrant = QdrantVectorStore(client=client, embedding=embed_model, collection_name='demo')
 
 # Streamlit UI
-st.title("Chat with Qdrant and OpenAI")
+st.title("Chat with Xeven Solution.")
+st.image("https://images.app.goo.gl/tNjuiEsZ9tvM7A566", width=100)
+st.markdown("**Devloped by [Abdul Rehman]**")
 st.write("Ask your question below:")
 
 
@@ -49,10 +51,6 @@ query_fetcher= itemgetter("question")
 setup={"question":query_fetcher, "context":query_fetcher | retriever | format_docs}
 _chain = setup |_prompt | chat_llm | StrOutputParser()
 
-
-# Streamlit app layout
-st.title("Conversational Chain with RAG")
-
 # User query input
 query = st.text_input("Ask a question about Xeven:")
 
@@ -65,3 +63,7 @@ if query:
 if st.button("Clear History"):
     st.session_state['chat_history'] = []
     st.success("Chat history cleared!")
+
+
+st.markdown("---")  # Adds a line separator
+st.markdown("Developed by [Abdul Rehman]. Powered by Xeven Solutions.")    
