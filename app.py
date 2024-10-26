@@ -8,7 +8,7 @@ from langchain.chains import create_retrieval_chain
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from langchain.schema import AIMessage, HumanMessage
+from operator import itemgetter
 
 # Load environment variables
 qdrant_url = st.secrets["QDRANT_URL"]
