@@ -117,8 +117,8 @@ Question: {question}
 """
 _prompt = ChatPromptTemplate.from_template(prompt_str)
 num_chunks = 3
-retriever = qdrant.as_retriever(search_type="similarity",
-                                search_kwargs={"k": num_chunks})
+retriever = qdrant.as_retriever(search_type="similarity", search_kwargs={"k": num_chunks})
+                                
 chat_llm = ChatOpenAI(model_name=llm_name, openai_api_key=openai.api_key, temperature=0)
 query_fetcher = itemgetter("question")
 setup = {"question": query_fetcher, "context": query_fetcher | retriever | format_docs}
