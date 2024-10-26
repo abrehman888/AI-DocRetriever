@@ -15,6 +15,7 @@ qdrant_url = st.secrets["QDRANT_URL"]
 qdrant_key = st.secrets["QDRANT_API_KEY"]
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 collection_name=st.secrets["Collection_Name"]
+llm_name = "gpt-4o-mini"
 # Initialize embedding model
 embed_model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5')
 
