@@ -3,7 +3,6 @@ from qdrant_client import QdrantClient
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain_qdrant import QdrantVectorStore
 import openai
-import os
 from langchain.chains import create_retrieval_chain
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
@@ -122,7 +121,7 @@ _chain = setup | _prompt | chat_llm | StrOutputParser()
 # Create a form for user input
 with st.form(key="query_form"):
     query = st.text_input("Ask a question about Xeven:", key="user_query")
-    st.markdown(f'<div class="response-bubble">💡 **Response:** {response}</div>', unsafe_allow_html=True)
+    submit_button = st.form_submit_button(label="Get Response")  # Added submit button
 
 # Process the query if the form is submitted
 if submit_button and query:
