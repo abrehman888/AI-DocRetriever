@@ -27,7 +27,7 @@ qdrant = QdrantVectorStore(client=client, embedding=embed_model, collection_name
 
 # Streamlit UI
 st.title("Chat with Xeven Solution.")
-st.image("https://github.com/abrehman888/RAG/blob/main/xevensolutions_logo.jpeg", width=100)
+st.image("https://raw.githubusercontent.com/abrehman888/RAG/refs/heads/main/xevensolutions_logo.jpeg", width=100)
 st.markdown("**Devloped by [Abdul Rehman]**")
 st.write("Ask your question below:")
 
