@@ -27,8 +27,8 @@ qdrant = QdrantVectorStore(client=client, embedding=embed_model, collection_name
 
 # Streamlit UI
 st.image("https://raw.githubusercontent.com/abrehman888/RAG/refs/heads/main/xevensolutions_logo.jpeg", width=100)
-st.title("Chat with Xeven Solution")
-st.markdown("Developed by **Abdul Rehman**")
+st.markdown("<h1 style='text-align: center; font-weight: bold;'>Chat with Xeven Solution</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; font-size: 18px; color: grey;'>Developed by <span style='color: #D83A3A;'>Abdul Rehman</span></p>", unsafe_allow_html=True)
 
 st.write("Ask your question below:")
 
@@ -49,19 +49,69 @@ query_fetcher = itemgetter("question")
 setup = {"question": query_fetcher, "context": query_fetcher | retriever | format_docs}
 _chain = setup | _prompt | chat_llm | StrOutputParser()
 
+# CSS and JavaScript to hide/show the response button
+st.markdown("""
+    <style>
+        .response-btn {
+            display: none;
+            width: 100%;
+            background-color: #008080;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .response-btn:hover {
+            background-color: #006666;
+        }
+        .clear-btn {
+            width: 100%;
+            background-color: #A9A9A9;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+    </style>
+    <script>
+        function toggleButton() {
+            var input = document.querySelector('.stTextInput input');
+            var button = document.querySelector('.response-btn');
+            input.addEventListener('input', function() {
+                if (input.value.trim() !== '') {
+                    button.style.display = 'block';
+                } else {
+                    button.style.display = 'none';
+                }
+            });
+        }
+        document.addEventListener('DOMContentLoaded', toggleButton);
+    </script>
+""", unsafe_allow_html=True)
+
 # User query input
 query = st.text_input("🔍 Ask a question about Xeven:")
 
+# Get Response button (hidden initially)
+response_button_placeholder = st.empty()
+response_button = response_button_placeholder.button("Get Response", key="response_button", help="Click to get a response based on your question")
+
 # Check if there's a query and process it
-if query:
-    if st.button("Get Response"):
-        response = _chain.invoke({"question": query})
-        st.write("Response:", response)
+if response_button and query:
+    response = _chain.invoke({"question": query})
+    st.write("Response:", response)
 
 # Option to clear the chat history
-if st.button("Clear History"):
+if st.button("Clear History", key="clear_history", help="Clear the chat history to start fresh"):
     st.session_state['chat_history'] = []
     st.success("Chat history cleared!")
 
-st.markdown("---")  # Adds a line separator
-st.markdown("Developed by Abdul Rehman. Powered by Xeven Solutions.")
+# Additional footer styling and separator
+st.markdown("<hr style='border: 1px solid #DDD;'/>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'>Developed by Abdul Rehman. Powered by Xeven Solutions.</p>", unsafe_allow_html=True)
