@@ -28,7 +28,7 @@ qdrant = QdrantVectorStore(client=client, embedding=embed_model, collection_name
 # Streamlit UI
 st.title("🤖 Chat with Xeven Solution")
 # Display Abdul Rehman's image (replace the path with your image path or URL)
-st.image("https://path-to-abdul-rehman-image.jpg", width=100)
+st.image("https://raw.githubusercontent.com/abrehman888/RAG/refs/heads/main/xevensolutions_logo.jpeg", width=100)
 
 # Display the Xeven logo next to the question input
 st.markdown(
