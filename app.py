@@ -3,7 +3,6 @@ from qdrant_client import QdrantClient
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain_qdrant import QdrantVectorStore
 import openai
-import os
 from langchain.chains import create_retrieval_chain
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
@@ -11,7 +10,7 @@ from langchain_core.output_parsers import StrOutputParser
 from operator import itemgetter
 
 # Set page configuration for title and icon
-st.set_page_config(page_title="Chat with Xeven Solution", page_icon=":speech_balloon:")
+st.set_page_config(page_title="Chat with Xeven Solution", page_icon="💬")
 
 # Load environment variables
 qdrant_url = st.secrets["QDRANT_URL"]
@@ -29,7 +28,7 @@ client = QdrantClient(url=qdrant_url, api_key=qdrant_key)
 # Initialize QdrantVectorStore
 qdrant = QdrantVectorStore(client=client, embedding=embed_model, collection_name=collection_name)
 
-# Custom CSS for enhanced styling
+# Custom CSS for enhanced styling with emojis and highlighted name
 st.markdown("""
     <style>
         body {
@@ -47,6 +46,14 @@ st.markdown("""
         }
         .logo-img {
             width: 50px;
+        }
+
+        .highlighted-name {
+            color: #4285f4;
+            font-weight: bold;
+            background-color: #e3f2fd;
+            padding: 2px 8px;
+            border-radius: 5px;
         }
 
         .input-area {
@@ -96,8 +103,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Streamlit UI
-st.markdown('<div class="header-title"><img src="https://raw.githubusercontent.com/abrehman888/RAG/refs/heads/main/xevensolutions_logo.jpeg" class="logo-img" />Chat with Xeven Solution</div>', unsafe_allow_html=True)
-st.write("**Developed by Abdul Rehman**")
+st.markdown('<div class="header-title">💬 Chat with Xeven Solution</div>', unsafe_allow_html=True)
+st.write("**Developed by <span class='highlighted-name'>Abdul Rehman</span>**", unsafe_allow_html=True)
 
 st.write("Ask your question below:")
 
@@ -119,13 +126,15 @@ query_fetcher = itemgetter("question")
 setup = {"question": query_fetcher, "context": query_fetcher | retriever | format_docs}
 _chain = setup | _prompt | chat_llm | StrOutputParser()
 
-# User query input
-query = st.text_input("Ask a question about Xeven:", key="user_query")
+# Create a form for user input
+with st.form(key="query_form"):
+    query = st.text_input("Ask a question about Xeven:", key="user_query")
+    submit_button = st.form_submit_button(label="Submit")
 
-# Process the query if input is provided
-if query:
+# Process the query if the form is submitted
+if submit_button and query:
     response = _chain.invoke({"question": query})
-    st.markdown(f'<div class="response-bubble">Response: {response}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="response-bubble">💡 **Response:** {response}</div>', unsafe_allow_html=True)
 
 # Option to clear the chat history
 if st.button("Clear History"):
@@ -133,4 +142,4 @@ if st.button("Clear History"):
     st.success("Chat history cleared!")
 
 st.markdown("---")  # Adds a line separator
-st.markdown('<div class="footer">Developed by Abdul Rehman. Powered by Xeven Solutions.</div>', unsafe_allow_html=True)
+st.markdown('<div class="footer">🚀 Developed by <span class="highlighted-name">Abdul Rehman</span>. Powered by Xeven Solutions.</div>', unsafe_allow_html=True)
