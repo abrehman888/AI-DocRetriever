@@ -122,7 +122,7 @@ _chain = setup | _prompt | chat_llm | StrOutputParser()
 # Create a form for user input
 with st.form(key="query_form"):
     query = st.text_input("Ask a question about Xeven:", key="user_query")
-    submit_button = st.form_submit_button(label="Submit")
+    st.markdown(f'<div class="response-bubble">💡 **Response:** {response}</div>', unsafe_allow_html=True)
 
 # Process the query if the form is submitted
 if submit_button and query:
@@ -130,7 +130,7 @@ if submit_button and query:
     st.markdown(f'<div class="response-bubble">Response: {response}</div>', unsafe_allow_html=True)
 
 # Option to clear the chat history
-if st.button("Clear History"):
+if st.button("🧹 Clear History"):
     st.session_state['chat_history'] = []
     st.success("Chat history cleared!")
 
