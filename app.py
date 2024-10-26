@@ -27,7 +27,7 @@ qdrant = QdrantVectorStore(client=client, embedding=embed_model, collection_name
 
 # Streamlit UI
 st.image("https://raw.githubusercontent.com/abrehman888/RAG/refs/heads/main/xevensolutions_logo.jpeg", width=100)
-st.markdown("<h1 style='text-align: center; font-weight: bold;'>Chat with Xeven Solution</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; font-weight: bold;'> 💬 Chat with Xeven Solution</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; font-size: 18px; color: grey;'>Developed by <span style='color: #D83A3A;'>Abdul Rehman</span></p>", unsafe_allow_html=True)
 
 st.write("Ask your question below:")
@@ -100,7 +100,7 @@ query = st.text_input("🔍 Ask a question about Xeven:")
 
 # Get Response button (hidden initially)
 response_button_placeholder = st.empty()
-response_button = response_button_placeholder.button("Get Response", key="response_button", help="Click to get a response based on your question")
+response_button = response_button_placeholder.button("💡 Get Response", key="response_button", help="Click to get a response based on your question")
 
 # Check if there's a query and process it
 if response_button and query:
@@ -108,10 +108,10 @@ if response_button and query:
     st.write("Response:", response)
 
 # Option to clear the chat history
-if st.button("Clear History", key="clear_history", help="Clear the chat history to start fresh"):
+if st.button("🧹 Clear History", key="clear_history", help="Clear the chat history to start fresh"):
     st.session_state['chat_history'] = []
     st.success("Chat history cleared!")
 
 # Additional footer styling and separator
 st.markdown("<hr style='border: 1px solid #DDD;'/>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center;'>Developed by Abdul Rehman. Powered by Xeven Solutions.</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'> 🚀 Developed by Abdul Rehman. Powered by Xeven Solutions.</p>", unsafe_allow_html=True)
