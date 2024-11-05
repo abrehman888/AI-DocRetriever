@@ -32,33 +32,37 @@ st.markdown("<p style='text-align: center; font-size: 18px; color: grey;'>Develo
 # Prompt user to enter OpenAI API key
 api_key = st.text_input("ENTER YOUR OpenAI API KEY", type="password")
 
-# Only show the query input if the API key is provided
+# Only show the query input and response button if the API key is provided
 if api_key:
     openai.api_key = api_key
     query = st.text_input("🔍 Ask a question about Xeven:")
 
-    if query:
-        # Check if user has both API key and query before initializing ChatOpenAI
-        try:
-            # Set up the prompt template and initialize the LLM when both inputs are provided
-            prompt_str = """
-            Answer the user question based only on the following context:
-            {context}
-            Question: {question}
-            """
-            _prompt = ChatPromptTemplate.from_template(prompt_str)
-            num_chunks = 3
-            retriever = qdrant.as_retriever(search_type="similarity", search_kwargs={"k": num_chunks})
-            chat_llm = ChatOpenAI(model_name=llm_name, openai_api_key=api_key, temperature=0)
-            query_fetcher = itemgetter("question")
-            setup = {"question": query_fetcher, "context": query_fetcher | retriever | format_docs}
-            _chain = setup | _prompt | chat_llm | StrOutputParser()
+    # Add a "Response" button
+    if st.button("Get Response"):
+        if query:
+            # Check if user has both API key and query before initializing ChatOpenAI
+            try:
+                # Set up the prompt template and initialize the LLM when both inputs are provided
+                prompt_str = """
+                Answer the user question based only on the following context:
+                {context}
+                Question: {question}
+                """
+                _prompt = ChatPromptTemplate.from_template(prompt_str)
+                num_chunks = 3
+                retriever = qdrant.as_retriever(search_type="similarity", search_kwargs={"k": num_chunks})
+                chat_llm = ChatOpenAI(model_name=llm_name, openai_api_key=api_key, temperature=0)
+                query_fetcher = itemgetter("question")
+                setup = {"question": query_fetcher, "context": query_fetcher | retriever | format_docs}
+                _chain = setup | _prompt | chat_llm | StrOutputParser()
 
-            # Run the chain to get the response
-            response = _chain.invoke({"question": query})
-            st.write("Response:", response)
-        except Exception as e:
-            st.error("An error occurred. Please check if your OpenAI API key is correct.")
+                # Run the chain to get the response
+                response = _chain.invoke({"question": query})
+                st.write("Response:", response)
+            except Exception as e:
+                st.error("An error occurred. Please check if your OpenAI API key is correct.")
+        else:
+            st.warning("Please enter a query to get a response.")
 else:
     st.warning("Please enter your OpenAI API key to proceed.")
 
