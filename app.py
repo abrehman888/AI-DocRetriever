@@ -32,88 +32,35 @@ st.markdown("<p style='text-align: center; font-size: 18px; color: grey;'>Develo
 # Prompt user to enter OpenAI API key
 api_key = st.text_input("ENTER YOUR OpenAI API KEY", type="password")
 
+# Only show the query input if the API key is provided
 if api_key:
     openai.api_key = api_key
+    query = st.text_input("🔍 Ask a question about Xeven:")
+
+    if query:
+        # Check if user has both API key and query before initializing ChatOpenAI
+        try:
+            # Set up the prompt template and initialize the LLM when both inputs are provided
+            prompt_str = """
+            Answer the user question based only on the following context:
+            {context}
+            Question: {question}
+            """
+            _prompt = ChatPromptTemplate.from_template(prompt_str)
+            num_chunks = 3
+            retriever = qdrant.as_retriever(search_type="similarity", search_kwargs={"k": num_chunks})
+            chat_llm = ChatOpenAI(model_name=llm_name, openai_api_key=api_key, temperature=0)
+            query_fetcher = itemgetter("question")
+            setup = {"question": query_fetcher, "context": query_fetcher | retriever | format_docs}
+            _chain = setup | _prompt | chat_llm | StrOutputParser()
+
+            # Run the chain to get the response
+            response = _chain.invoke({"question": query})
+            st.write("Response:", response)
+        except Exception as e:
+            st.error("An error occurred. Please check if your OpenAI API key is correct.")
 else:
     st.warning("Please enter your OpenAI API key to proceed.")
-
-st.write("Ask your question below:")
-
-def format_docs(docs):
-    return "\n\n".join(doc.page_content for doc in docs)
-
-# Set up the prompt template
-prompt_str = """
-Answer the user question based only on the following context:
-{context}
-Question: {question}
-"""
-_prompt = ChatPromptTemplate.from_template(prompt_str)
-num_chunks = 3
-retriever = qdrant.as_retriever(search_type="similarity", search_kwargs={"k": num_chunks})
-chat_llm = ChatOpenAI(model_name=llm_name, openai_api_key=api_key, temperature=0)
-query_fetcher = itemgetter("question")
-setup = {"question": query_fetcher, "context": query_fetcher | retriever | format_docs}
-_chain = setup | _prompt | chat_llm | StrOutputParser()
-
-# CSS and JavaScript to hide/show the response button
-st.markdown("""
-    <style>
-        .response-btn {
-            display: none;
-            width: 100%;
-            background-color: #008080;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 10px;
-        }
-        .response-btn:hover {
-            background-color: #006666;
-        }
-        .clear-btn {
-            width: 100%;
-            background-color: #A9A9A9;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 10px;
-        }
-    </style>
-    <script>
-        function toggleButton() {
-            var input = document.querySelector('.stTextInput input');
-            var button = document.querySelector('.response-btn');
-            input.addEventListener('input', function() {
-                if (input.value.trim() !== '') {
-                    button.style.display = 'block';
-                } else {
-                    button.style.display = 'none';
-                }
-            });
-        }
-        document.addEventListener('DOMContentLoaded', toggleButton);
-    </script>
-""", unsafe_allow_html=True)
-
-# User query input
-query = st.text_input("🔍 Ask a question about Xeven:")
-
-# Validate API key and question input before running the chain
-if not api_key:
-    st.error("Please enter your OpenAI API key to ask a question.")
-elif st.button("💡 Get Response", key="response_button") and query:
-    try:
-        response = _chain.invoke({"question": query})
-        st.write("Response:", response)
-    except Exception as e:
-        st.error("An error occurred. Please check if your OpenAI API key is correct.")
 
 # Option to clear the chat history
 if st.button("🧹 Clear History", key="clear_history", help="Clear the chat history to start fresh"):
