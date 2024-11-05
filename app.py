@@ -7,7 +7,6 @@ from langchain.chains import create_retrieval_chain
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from operator import itemgetter
 
 # Load environment variables
 qdrant_url = st.secrets["QDRANT_URL"]
@@ -22,7 +21,7 @@ embed_model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5')
 client = QdrantClient(url=qdrant_url, api_key=qdrant_key)
 
 # Initialize QdrantVectorStore
-qdrant = QdrantVectorStore(client=client, embedding=embed_model, collection_name='demo')
+qdrant = QdrantVectorStore(client=client, embedding=embed_model, collection_name=collection_name)
 
 # Streamlit UI
 st.image("https://raw.githubusercontent.com/abrehman888/RAG/refs/heads/main/xevensolutions_logo.jpeg", width=100)
@@ -32,37 +31,36 @@ st.markdown("<p style='text-align: center; font-size: 18px; color: grey;'>Develo
 # Prompt user to enter OpenAI API key
 api_key = st.text_input("ENTER YOUR OpenAI API KEY", type="password")
 
-# Only show the query input and response button if the API key is provided
+# Only show the query input if the API key is provided
 if api_key:
     openai.api_key = api_key
     query = st.text_input("🔍 Ask a question about Xeven:")
 
-    # Add a "Response" button
+    # Add a button to submit the query
     if st.button("Get Response"):
         if query:
-            # Check if user has both API key and query before initializing ChatOpenAI
             try:
-                # Set up the prompt template and initialize the LLM when both inputs are provided
+                # Set up the prompt template
                 prompt_str = """
                 Answer the user question based only on the following context:
                 {context}
                 Question: {question}
                 """
                 _prompt = ChatPromptTemplate.from_template(prompt_str)
+                
+                # Initialize the retriever and chat model
                 num_chunks = 3
                 retriever = qdrant.as_retriever(search_type="similarity", search_kwargs={"k": num_chunks})
                 chat_llm = ChatOpenAI(model_name=llm_name, openai_api_key=api_key, temperature=0)
-                query_fetcher = itemgetter("question")
-                setup = {"question": query_fetcher, "context": query_fetcher | retriever | format_docs}
-                _chain = setup | _prompt | chat_llm | StrOutputParser()
+                
+                # Create the retrieval chain
+                chain = create_retrieval_chain(chat_llm, retriever=retriever, prompt=_prompt, output_parser=StrOutputParser())
 
                 # Run the chain to get the response
-                response = _chain.invoke({"question": query})
+                response = chain.run({"question": query})
                 st.write("Response:", response)
             except Exception as e:
-                st.error("An error occurred. Please check if your OpenAI API key is correct.")
-        else:
-            st.warning("Please enter a query to get a response.")
+                st.error(f"An error occurred: {e}")
 else:
     st.warning("Please enter your OpenAI API key to proceed.")
 
