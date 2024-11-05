@@ -29,7 +29,8 @@ qdrant = QdrantVectorStore(client=client, embedding=embed_model, collection_name
 st.image("https://raw.githubusercontent.com/abrehman888/RAG/refs/heads/main/xevensolutions_logo.jpeg", width=100)
 st.markdown("<h1 style='text-align: center; font-weight: bold;'> 💬 Chat with Xeven Solution</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; font-size: 18px; color: grey;'>Developed by <span style='color: #D83A3A;'>Abdul Rehman</span></p>", unsafe_allow_html=True)
-
+api_key = st.text_input("ENTER YOUR your OPENAI_API_KEY")
+openai.api_key = api_key
 st.write("Ask your question below:")
 
 def format_docs(docs):
