@@ -35,6 +35,9 @@ user_openai_key = st.text_input("🔑 Enter your OpenAI API Key:", type="passwor
 # User query input
 query = st.text_input("🔍 Ask a question about Xeven:")
 
+def format_docs(docs):
+    return "\n\n".join(doc.page_content for doc in docs)
+
 # Set up the prompt template
 prompt_str = """
 Answer the user question based only on the following context:
