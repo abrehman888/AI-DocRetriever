@@ -94,7 +94,6 @@ st.markdown("""
         document.addEventListener('DOMContentLoaded', toggleButton);
     </script>
 """, unsafe_allow_html=True)
-api_key = st.text_input("ENTER YOUR your OPENAI_API_KEY")
 
 # User query input
 query = st.text_input("🔍 Ask a question about Xeven:")
