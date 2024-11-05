@@ -12,7 +12,6 @@ from operator import itemgetter
 # Load environment variables
 qdrant_url = st.secrets["QDRANT_URL"]
 qdrant_key = st.secrets["QDRANT_API_KEY"]
-api_key = st.text_input("ENTER YOUR your OPENAI_API_KEY")
 openai.api_key = api_key
 collection_name = st.secrets["Collection_Name"]
 llm_name = "gpt-4o-mini"
@@ -95,6 +94,7 @@ st.markdown("""
         document.addEventListener('DOMContentLoaded', toggleButton);
     </script>
 """, unsafe_allow_html=True)
+api_key = st.text_input("ENTER YOUR your OPENAI_API_KEY")
 
 # User query input
 query = st.text_input("🔍 Ask a question about Xeven:")
