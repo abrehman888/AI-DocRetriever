@@ -28,13 +28,15 @@ qdrant = QdrantVectorStore(client=client, embedding=embed_model, collection_name
 st.image("https://raw.githubusercontent.com/abrehman888/RAG/refs/heads/main/xevensolutions_logo.jpeg", width=100)
 st.markdown("<h1 style='text-align: center; font-weight: bold;'> 💬 Chat with Xeven Solution</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; font-size: 18px; color: grey;'>Developed by <span style='color: #D83A3A;'>Abdul Rehman</span></p>", unsafe_allow_html=True)
-api_key = st.text_input("ENTER YOUR your OPENAI_API_KEY")
-openai.api_key = api_key
-if api_key =" "
-   print("Please print valid API Key")
-else
-    print("Please Enter your key")
-   
+
+# Prompt user to enter OpenAI API key
+api_key = st.text_input("ENTER YOUR OpenAI API KEY", type="password")
+
+if api_key:
+    openai.api_key = api_key
+else:
+    st.warning("Please enter your OpenAI API key to proceed.")
+
 st.write("Ask your question below:")
 
 def format_docs(docs):
@@ -49,7 +51,7 @@ Question: {question}
 _prompt = ChatPromptTemplate.from_template(prompt_str)
 num_chunks = 3
 retriever = qdrant.as_retriever(search_type="similarity", search_kwargs={"k": num_chunks})
-chat_llm = ChatOpenAI(model_name=llm_name, openai_api_key=openai.api_key, temperature=0)
+chat_llm = ChatOpenAI(model_name=llm_name, openai_api_key=api_key, temperature=0)
 query_fetcher = itemgetter("question")
 setup = {"question": query_fetcher, "context": query_fetcher | retriever | format_docs}
 _chain = setup | _prompt | chat_llm | StrOutputParser()
@@ -103,14 +105,15 @@ st.markdown("""
 # User query input
 query = st.text_input("🔍 Ask a question about Xeven:")
 
-# Get Response button (hidden initially)
-response_button_placeholder = st.empty()
-response_button = response_button_placeholder.button("💡 Get Response", key="response_button", help="Click to get a response based on your question")
-
-# Check if there's a query and process it
-if response_button and query:
-    response = _chain.invoke({"question": query})
-    st.write("Response:", response)
+# Validate API key and question input before running the chain
+if not api_key:
+    st.error("Please enter your OpenAI API key to ask a question.")
+elif st.button("💡 Get Response", key="response_button") and query:
+    try:
+        response = _chain.invoke({"question": query})
+        st.write("Response:", response)
+    except Exception as e:
+        st.error("An error occurred. Please check if your OpenAI API key is correct.")
 
 # Option to clear the chat history
 if st.button("🧹 Clear History", key="clear_history", help="Clear the chat history to start fresh"):
