@@ -54,7 +54,12 @@ if api_key:
                 chat_llm = ChatOpenAI(model_name=llm_name, openai_api_key=api_key, temperature=0)
                 
                 # Create the retrieval chain
-                chain = create_retrieval_chain(chat_llm, retriever=retriever, prompt=_prompt, output_parser=StrOutputParser())
+                chain = create_retrieval_chain(
+                    llm=chat_llm,
+                    retriever=retriever,
+                    prompt=_prompt,
+                    output_parser=StrOutputParser()
+                )
 
                 # Run the chain to get the response
                 response = chain.run({"question": query})
