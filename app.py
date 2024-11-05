@@ -3,10 +3,8 @@ from qdrant_client import QdrantClient
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain_qdrant import QdrantVectorStore
 import openai
-from langchain.chains import create_retrieval_chain
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
 
 # Load environment variables
 qdrant_url = st.secrets["QDRANT_URL"]
@@ -46,24 +44,23 @@ if api_key:
                 {context}
                 Question: {question}
                 """
-                _prompt = ChatPromptTemplate.from_template(prompt_str)
+                prompt = ChatPromptTemplate.from_template(prompt_str)
                 
-                # Initialize the retriever and chat model
+                # Initialize the retriever
                 num_chunks = 3
                 retriever = qdrant.as_retriever(search_type="similarity", search_kwargs={"k": num_chunks})
-                chat_llm = ChatOpenAI(model_name=llm_name, openai_api_key=api_key, temperature=0)
                 
-                # Create the retrieval chain
-                chain = create_retrieval_chain(
-                    llm=chat_llm,
-                    retriever=retriever,
-                    prompt=_prompt,
-                    output_parser=StrOutputParser()
-                )
+                # Retrieve relevant documents based on query
+                retrieved_docs = retriever.retrieve({"question": query})
+                
+                # Combine context from retrieved documents
+                context = "\n".join([doc.page_content for doc in retrieved_docs])
 
-                # Run the chain to get the response
-                response = chain.run({"question": query})
-                st.write("Response:", response)
+                # Use ChatOpenAI to get the response
+                chat_llm = ChatOpenAI(model_name=llm_name, openai_api_key=api_key, temperature=0)
+                response = chat_llm({"context": context, "question": query})
+
+                st.write("Response:", response["content"])
             except Exception as e:
                 st.error(f"An error occurred: {e}")
 else:
