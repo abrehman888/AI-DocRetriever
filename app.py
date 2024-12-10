@@ -14,6 +14,7 @@ qdrant_url = st.secrets["QDRANT_URL"]
 qdrant_key = st.secrets["QDRANT_API_KEY"]
 collection_name = st.secrets["Collection_Name"]
 llm_name = "gpt-4o-mini"
+openai_api_key=st.secrets["OPENAI_API_KEY"]
 
 # Initialize embedding model
 embed_model = HuggingFaceEmbeddings(model_name='BAAI/bge-small-en-v1.5')
@@ -28,9 +29,6 @@ qdrant = QdrantVectorStore(client=client, embedding=embed_model, collection_name
 st.image("https://raw.githubusercontent.com/abrehman888/RAG/refs/heads/main/xevensolutions_logo.jpeg", width=100)
 st.markdown("<h1 style='text-align: center; font-weight: bold;'> 💬 Chat with Xeven Solution</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; font-size: 18px; color: grey;'>Developed by <span style='color: #D83A3A;'>Abdul Rehman</span></p>", unsafe_allow_html=True)
-
-# User input for OpenAI API key
-user_openai_key = st.text_input("🔑 Enter your OpenAI API Key:", type="password")
 
 # User query input
 query = st.text_input("🔍 Ask a question about Xeven:")
@@ -50,7 +48,7 @@ retriever = qdrant.as_retriever(search_type="similarity", search_kwargs={"k": nu
 
 # Check if the user has entered their API key
 if user_openai_key:
-    chat_llm = ChatOpenAI(model_name=llm_name, openai_api_key=user_openai_key, temperature=0)
+    chat_llm = ChatOpenAI(model_name=llm_name, openai_api_key=openai_api_key, temperature=0)
     query_fetcher = itemgetter("question")
     setup = {"question": query_fetcher, "context": query_fetcher | retriever | format_docs}
     _chain = setup | _prompt | chat_llm | StrOutputParser()
