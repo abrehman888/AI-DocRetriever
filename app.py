@@ -47,7 +47,7 @@ num_chunks = 3
 retriever = qdrant.as_retriever(search_type="similarity", search_kwargs={"k": num_chunks})
 
 # Check if the user has entered their API key
-if user_openai_key:
+
     chat_llm = ChatOpenAI(model_name=llm_name, openai_api_key=openai_api_key, temperature=0)
     query_fetcher = itemgetter("question")
     setup = {"question": query_fetcher, "context": query_fetcher | retriever | format_docs}
