@@ -48,10 +48,10 @@ retriever = qdrant.as_retriever(search_type="similarity", search_kwargs={"k": nu
 
 # Check if the user has entered their API key
 
-    chat_llm = ChatOpenAI(model_name=llm_name, openai_api_key=openai_api_key, temperature=0)
-    query_fetcher = itemgetter("question")
-    setup = {"question": query_fetcher, "context": query_fetcher | retriever | format_docs}
-    _chain = setup | _prompt | chat_llm | StrOutputParser()
+chat_llm = ChatOpenAI(model_name=llm_name, openai_api_key=openai_api_key, temperature=0)
+query_fetcher = itemgetter("question")
+setup = {"question": query_fetcher, "context": query_fetcher | retriever | format_docs}
+_chain = setup | _prompt | chat_llm | StrOutputParser()
 
     # Get Response button
     if st.button("💡 Get Response"):
